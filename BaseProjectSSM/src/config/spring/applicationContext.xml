@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+ 
+	<!-- 数据库连接信息的配置文件 -->
+	<context:property-placeholder location="classpath:config/db.properties" />
+      <!--扫描包-->
+       <context:component-scan base-package="com.ischoolbar.programmer.service.admin"></context:component-scan>
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	 </bean>
+	 
+	<!--.事务管理器 （JDBC）-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--自动声明式事物驱动  -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!--  spring 通过SqlSessionFactoryBean获取sqlSessionFactory 工厂类-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource"></property>
+        <!-- 别名 -->
+        <property name="typeAliasesPackage" value="com.ischoolbar.programmer.entity.admin"></property>
+        <!-- sql映射文件路径 -->
+       <property name="mapperLocations" value="classpath:config/mybatis/mapper/admin/*.xml"></property> 
+    </bean>
+    
+     <!-- 配置dao包，动态实现dao接口，注入到spring容器中 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--指定会话工厂，如果当前上下文中只定义了一个则该属性可省去 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <!-- 指定要自动扫描接口的基础包，实现接口 -->
+        <property name="basePackage" value="com.ischoolbar.programmer.dao.admin"></property>
+    </bean>
+    
+    <!-- <bean id="gson" class = "com.google.gson.Gson" scope="prototype"></bean> -->
+</beans>
+ 
